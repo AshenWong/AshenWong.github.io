@@ -7,7 +7,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://ashenwong.github.io/img/avatar.jpg">
 <meta property="article:published_time" content="2024-09-10T07:51:19.000Z">
-<meta property="article:modified_time" content="2024-09-10T12:12:44.043Z">
+<meta property="article:modified_time" content="2024-09-10T12:20:22.661Z">
 <meta property="article:author" content="王三土">
 <meta property="article:tag" content="Raft">
 <meta name="twitter:card" content="summary">
@@ -56,7 +56,7 @@
   isHome: false,
   isHighlightShrink: false,
   isToc: true,
-  postUpdate: '2024-09-10 20:12:44'
+  postUpdate: '2024-09-10 20:20:22'
 }</script><script>(win=>{
       win.saveToLocal = {
         set: (key, value, ttl) => {
@@ -153,7 +153,7 @@
         }
       }
       detectApple()
-    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 文档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/background.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="王三土的博客"><span class="site-name">王三土的博客</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 文档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Raft论文学习笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-10T07:51:19.000Z" title="发表于 2024-09-10 15:51:19">2024-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-09-10T12:12:44.043Z" title="更新于 2024-09-10 20:12:44">2024-09-10</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Raft论文学习笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="Raft集群"><a href="#Raft集群" class="headerlink" title="Raft集群"></a>Raft集群</h3><p>一个Raft集群包含多台服务器，每个服务器处于以下三种状态之一：</p>
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 文档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/background.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="王三土的博客"><span class="site-name">王三土的博客</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 文档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Raft论文学习笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-10T07:51:19.000Z" title="发表于 2024-09-10 15:51:19">2024-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-09-10T12:20:22.661Z" title="更新于 2024-09-10 20:20:22">2024-09-10</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Raft论文学习笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="Raft集群"><a href="#Raft集群" class="headerlink" title="Raft集群"></a>Raft集群</h3><p>一个Raft集群包含多台服务器，每个服务器处于以下三种状态之一：</p>
 <p><strong>领导者(Leader)</strong></p>
 <p>接收并处理客户端请求，领导者全权管理日志，领导者接受来自客户端的日志条目，将它们复制到其他服务器上，并告诉服务器何时将日志条目应用到它们的状态机是安全的。</p>
 <p><strong>追随者(Follower)</strong></p>
@@ -290,16 +290,16 @@
 <h2 id="RPC"><a href="#RPC" class="headerlink" title="RPC"></a>RPC</h2><p>服务器之间采用RPC（Remote Procedure Calls，远程调用通信）进行通信，基本的一致性算法只需要两种类型的RPC：</p>
 <p><strong>RequestVote RPCs</strong></p>
 <p>RequestVote RPC由候选人在选举期间发起</p>
-<p><img src="/Raft/RequestVote.png"></p>
+<p><img src="https://ashenwong.github.io/2024/09/10/Raft/RequestVote.png"></p>
 <p><strong>AppendEntries RPCs</strong></p>
 <p>AppendEntries RPC由领导者发起，用于复制日志条目并提供一种形式的心跳（heartbeat）以维护他们的权威。</p>
 <ul>
 <li>其中prevLogIndex &#x3D; leader.nextIndex[i] - 1</li>
 </ul>
-<p><img src="/Raft/AppendEntries.png"></p>
+<p><img src="https://ashenwong.github.io/2024/09/10/Raft/AppendEntries.png"></p>
 <p>除了基本的一致性rpc之外，还有一个追随者快速追赶领导者日志的InstallSnapshot RPC</p>
 <p><strong>InstallSnapshot RPCs</strong></p>
-<p><img src="/Raft/InstallSnapshot.png"></p>
+<p><img src="https://ashenwong.github.io/2024/09/10/Raft/InstallSnapshot.png"></p>
 <h2 id="服务器规则"><a href="#服务器规则" class="headerlink" title="服务器规则"></a>服务器规则</h2><p><strong>所有服务器</strong></p>
 <ul>
 <li>如果commitIndex&gt;lastApplied：increment lastApplied，则将log[lastApplied]应用于状态机</li>
@@ -340,7 +340,7 @@
 <li>任一配置中的任何服务器都可以作为领导者。</li>
 <li>达成共识需要获得分别来自新配置和旧配置的大多数支持。（e.g. 如果9台新配置服务器中的8台服务器都表示支持，而3台旧配置中的服务器只有1台服务器表示支持，那么候选者依然无法成为领导者，只有当有两台服务器表示支持时，候选者才能成为领导者）</li>
 </ul>
-<p><img src="/Raft/ClusterConfigurationChange.png"> </p>
+<p><img src="https://ashenwong.github.io/2024/09/10/Raft/ClusterConfigurationChange.png"> </p>
 <h2 id="日志压缩"><a href="#日志压缩" class="headerlink" title="日志压缩"></a>日志压缩</h2><p>Raft使用<strong>快照（snapshot）</strong> 来进行日志压缩，每台服务器独立拍摄快照，只包含其日志中提交的条目。当服务器拍摄快照之后，就删除快照已包含的日志内容。</p>
 <p>snapshot元数据，用于快照后的AppendEntries一致性检查：</p>
 <ul>
@@ -354,7 +354,7 @@
 <blockquote>
 <p>当follower接收到InstallSnapshot RPC时，如果快照包含不在其日志中的新信息，他会丢弃所有日志，并被快照取代；如果是描述之前日志内容的快照，那么他将被快照覆盖的日志删除，替换为快照中的信息。</p>
 </blockquote>
-<p> <img src="/Raft/LogCompaction.png"></p>
+<p> <img src="https://ashenwong.github.io/2024/09/10/Raft/LogCompaction.png"></p>
 <h2 id="客户端行为"><a href="#客户端行为" class="headerlink" title="客户端行为"></a>客户端行为</h2><p><strong>写请求：</strong></p>
 <ul>
 <li>当领导者在日志提交后以及响应客户端前崩溃，那么客户端会重新向集群发送请求，如此情况下这个日志可能会被执行多次。</li>
@@ -381,7 +381,7 @@
 <li><p><strong>读操作总是返回最后一次写操作的结果(read return results of last write)</strong></p>
 </li>
 </ol>
-<h2 id="Raft使用"><a href="#Raft使用" class="headerlink" title="Raft使用"></a>Raft使用</h2><p><img src="/Raft/UsingRaft.png"></p>
+<h2 id="Raft使用"><a href="#Raft使用" class="headerlink" title="Raft使用"></a>Raft使用</h2><p><img src="https://ashenwong.github.io/2024/09/10/Raft/UsingRaft.png"></p>
 <ol>
 <li>kv服务器中集成了raft相关包</li>
 <li>kv存储主服务器接收客户端请求（客户端不断轮询服务器，直至发现主服务器为止）</li>
