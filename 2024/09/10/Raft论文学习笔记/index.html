@@ -1,0 +1,422 @@
+<!DOCTYPE html><html lang="[&quot;zh-CN&quot;,&quot;en&quot;,&quot;default&quot;]" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Raft论文学习笔记 | 王三土的博客</title><meta name="author" content="王三土"><meta name="copyright" content="王三土"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基本概念Raft集群一个Raft集群包含多台服务器，每个服务器处于以下三种状态之一： 领导者(Leader) 接收并处理客户端请求，领导者全权管理日志，领导者接受来自客户端的日志条目，将它们复制到其他服务器上，并告诉服务器何时将日志条目应用到它们的状态机是安全的。 追随者(Follower) 被动接收领导者和候选人的请求， 不发出请求 候选人(Candidate)： 如果追随者在一定时间内没有接收">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Raft论文学习笔记">
+<meta property="og:url" content="https://ashenwong.github.io/2024/09/10/Raft%E8%AE%BA%E6%96%87%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="王三土的博客">
+<meta property="og:description" content="基本概念Raft集群一个Raft集群包含多台服务器，每个服务器处于以下三种状态之一： 领导者(Leader) 接收并处理客户端请求，领导者全权管理日志，领导者接受来自客户端的日志条目，将它们复制到其他服务器上，并告诉服务器何时将日志条目应用到它们的状态机是安全的。 追随者(Follower) 被动接收领导者和候选人的请求， 不发出请求 候选人(Candidate)： 如果追随者在一定时间内没有接收">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ashenwong.github.io/img/avatar.jpg">
+<meta property="article:published_time" content="2024-09-10T06:48:14.000Z">
+<meta property="article:modified_time" content="2024-09-10T07:10:17.762Z">
+<meta property="article:author" content="王三土">
+<meta property="article:tag" content="Raft">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ashenwong.github.io/img/avatar.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://ashenwong.github.io/2024/09/10/Raft%E8%AE%BA%E6%96%87%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Raft论文学习笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-09-10 15:10:17'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 文档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/background.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="王三土的博客"><span class="site-name">王三土的博客</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 文档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Raft论文学习笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-10T06:48:14.000Z" title="发表于 2024-09-10 14:48:14">2024-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-09-10T07:10:17.762Z" title="更新于 2024-09-10 15:10:17">2024-09-10</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Raft论文学习笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="Raft集群"><a href="#Raft集群" class="headerlink" title="Raft集群"></a>Raft集群</h3><p>一个Raft集群包含多台服务器，每个服务器处于以下三种状态之一：</p>
+<p><strong>领导者(Leader)</strong></p>
+<p>接收并处理客户端请求，领导者全权管理日志，领导者接受来自客户端的日志条目，将它们复制到其他服务器上，并告诉服务器何时将日志条目应用到它们的状态机是安全的。</p>
+<p><strong>追随者(Follower)</strong></p>
+<p>被动接收领导者和候选人的请求， 不发出请求</p>
+<p><strong>候选人(Candidate)：</strong></p>
+<p>如果追随者在一定时间内没有接收到任何信息，其会转为候选人（领导者无法转为候选人）</p>
+<p>通常情况下，一个raft集群只有一个领导者，所有其他服务器都是追随者。</p>
+<h3 id="任期（Term）"><a href="#任期（Term）" class="headerlink" title="任期（Term）"></a>任期（Term）</h3><p>Raft将时间划分为任意长度的<strong>任期</strong>，任期标识为连续的整数，一个任期至多有一个领导者。每个任期都以选举开始，在选举中，有一个或多个候选人试图成为领导者。如果一个候选人获得了超过半数的选票，那么它将会成为这个任期的领导者；如果未能选举出领导者，那么将直接开始下一个任期。</p>
+<p><strong>任期</strong>在Raft中充当逻辑时钟，它允许服务器检测过时的信息，如过时的领导者。</p>
+<ul>
+<li>每当服务器之间进行通信时，它们会交换当前任期；如果一台服务器的当前任期小于另一台服务器，那么它会将其当前任期更新为较大的值。</li>
+<li>如果候选人或领导者发现其任期已经过时，它会立即转变为追随者状态。</li>
+<li>如果服务器收到带有过时任期的请求，它会拒绝该请求。</li>
+</ul>
+<h3 id="服务器存储的状态"><a href="#服务器存储的状态" class="headerlink" title="服务器存储的状态"></a>服务器存储的状态</h3><p><strong>持久状态（需在响应RPC前将其保存在服务器的稳定存储（硬盘）中）</strong></p>
+<p><strong>currentTerm：</strong> 服务器看到的最新任期（第一次启动时初始化为0，单调增加）</p>
+<p><strong>votedFor：</strong> 当前任期投票的对象（如果未投票则为null）</p>
+<p><strong>log[]：</strong> 日志条目；每个条目包含状态机的命令，以及领导者接收条目时的任期</p>
+<p><strong>易失状态</strong></p>
+<p><strong>commitIndex：</strong> 已提交的日志条目的最高索引</p>
+<p><strong>lastApplied：</strong> 已应用到状态机的日志条目的最高索引</p>
+<p>以下为仅存在于领导者的易失状态（在选举结束后重新初始化）</p>
+<p><strong>nextIndex[]：</strong> 对于每台服务器，需要发送到该服务器的下一个日志条目的索引（初始化为领导者最后一个日志条目的索引+1）</p>
+<p><strong>matchIndex[]：</strong> 对于每台服务器，已知的已复制条目的最高索引（初始化为0）</p>
+<ul>
+<li><p>applied 和 committed 两种状态的区别</p>
+</li>
+<li><p>一个日志条目只要被认为应用于状态机是安全的就是committed，未必已经应用于状态机（applied）</p>
+</li>
+<li><p>当一个日志条目被认为是committed，也会提交该条目之前的所有条目</p>
+</li>
+<li><p>当追随者发现日志条目为committed，它就会将其应用于状态机</p>
+</li>
+</ul>
+<h3 id="Raft特性"><a href="#Raft特性" class="headerlink" title="Raft特性"></a>Raft特性</h3><p><strong>Election Safety:</strong> 至多只有一个领导者</p>
+<p><strong>Leader Append-Only:</strong> 领导者从不修改或删减其日志</p>
+<p><strong>Log Matching:</strong> 如果两个日志具有一个相同任期和索引的条目，那么在这个条目之前的所有条目（包括该条目）都是相同的</p>
+<p><strong>Leader Completeness:</strong> 如果一个日志条目在某一特定任期提交，那么这个条目会一直存在于后续任期的领导者日志中</p>
+<p><strong>State Machine Safety:</strong> 如果一台服务器将一个特定索引的条目应用于状态机，那么其他服务器不能应用一个相同索引但命令不同的条目</p>
+<h2 id="Leader-Election"><a href="#Leader-Election" class="headerlink" title="Leader Election"></a>Leader Election</h2><p>领导者定期向所有追随者发送心跳（不携带日志条目的AppendEntries RPC），以维护他们的权威。如果追随者在一段称为选举超时（election timeout）的时间内没有收到任何通信，那么它认为没有可行的领导者，并开始选举新的领导者。</p>
+<p><strong>流程：</strong></p>
+<ol>
+<li><p>当追随者在election timeout时间内没有收到来自领导者的通信，那么它会转变为候选人状态，并增加其当前任期。</p>
+</li>
+<li><p>该候选人先对自己投票，并向集群中的每个其他服务器<strong>并行</strong>发出RequestVote RPC。</p>
+</li>
+<li><p>对于一个候选人来说一次选举可能存在以下三种情况：</p>
+<ol>
+<li><p>其赢得了选举（获得Raft集群中大多数服务器的选票）</p>
+</li>
+<li><p>另一个候选人赢得了选举，转变为追随者状态</p>
+</li>
+<li><p>没有人赢得选举，并开始下一个任期</p>
+</li>
+</ol>
+<ul>
+<li>投票规则：</li>
+</ul>
+<ol>
+<li><p>Raft集群中每台服务器至多只给一个候选人投票</p>
+</li>
+<li><p>每台服务器只给满足投票条件的第一个候选人投票</p>
+</li>
+<li><p>投票人比较其与候选人的日志信息，如果比候选人的更<strong>up-to-date</strong>则拒绝投票</p>
+</li>
+</ol>
+<p>通过比较日志最后一个条目来确定谁更<strong>up-to-date</strong></p>
+<p>a) 如果日志的最后一个条目具有不同的任期，那么具有较晚任期的日志更<strong>up-to-date</strong>。</p>
+<p>b) 如果日志的最后一个条目具有相同的任期，那么谁的日志更长（最后一个条目的index更大）谁更<strong>up-to-date</strong>。</p>
+</li>
+<li><p>当候选人赢得选举之后，其转变为领导者，并立即向所有其他服务器发送心跳消息，以建立其权威并防止新的选举。</p>
+</li>
+</ol>
+<ul>
+<li>其他可能出现的情况：</li>
+</ul>
+<ol>
+<li>候选人在等待投票结果时收到了自称是领导者的消息</li>
+</ol>
+<ul>
+<li><p>如果领导者的任期≥候选人的任期，那么候选人承认领导者的合法性，并转为追随者状态。</p>
+</li>
+<li><p>如果领导者的任期&lt;候选人的任期，候选人拒绝该通信，并维持候选人状态。</p>
+</li>
+</ul>
+<ol start="2">
+<li>多个追随者同时成为候选人，可能会导致选票分散，无法选举出新的领导者</li>
+</ol>
+<p>raft使用了随机的选举超时时间确保分散选票的情况很少发生。</p>
+<ul>
+<li>选举超时（election timeout）通常应当大于heartbeat的间隔</li>
+<li>每台服务器在任期开始时应当重置其选举超时</li>
+</ul>
+<h2 id="Log-replication"><a href="#Log-replication" class="headerlink" title="Log replication"></a>Log replication</h2><p>一旦服务器称为领导者，它便开始响应客户端请求。</p>
+<p><strong>流程：</strong></p>
+<ol>
+<li><p>客户端请求包含一条让复制状态机（Replicated State Machines）执行的命令；</p>
+</li>
+<li><p>领导者将该命令作为新条目添加到其日志中；</p>
+</li>
+<li><p>向每个其他服务器并行发出AppendEntries RPC来复制该条目；</p>
+</li>
+<li><p>当条目被安全复制（safely replicated）后，领导者将条目应用于其状态机，并将执行结果返回给客户端。</p>
+<ul>
+<li><p>安全复制（safely replicated）：日志条目已在大多数服务器上复制</p>
+</li>
+<li><p>如果追随者崩溃或运行缓慢，或网络数据包丢失，领导者会无限期地重试AppendEntries RPC（即使在领导者响应客户端之后），直到所有跟随者最终存储所有日志条目。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Raft实现了以下特性，两者一起组成了<strong>日志匹配特性（Log Matching Property）：</strong></p>
+<ul>
+<li>如果不同日志中的两个条目具有相同的索引和任期，则它们存储相同的命令。</li>
+<li>如果不同日志中的两个条目具有相同的索引和任期，则前面所有条目中的日志都是相同的。</li>
+</ul>
+<p><strong>实现方法：</strong></p>
+<ol>
+<li>领导者会在AppendEntries RPC中包含新条目之前的条目索引和任期。</li>
+<li>如果追随者在其日志中没有找到具有相同索引和术语的条目，那么它会拒绝新条目。</li>
+<li>为了使追随者的日志与领导者的日志保持一致，领导者必须找到两者保持一致的最新日志条目，删除追随者日志中该点之后的所有条目，并将领导者该点之后的所有条目发送给追随者。</li>
+<li>当领导者上位时，它将所有nextIndex值初始化为日志中最后一个条目索引+1。</li>
+<li>如果追随者的日志与领导者的日志不一致，一致性检查将在AppendEntries RPC中失败。</li>
+<li>RPC拒绝后，领导者将不断递减nextIndex并重试AppendEntries RPC；最终nextIndex将达到领导者和跟随者日志匹配的点。</li>
+<li>当这种情况发生时，AppendEntries将成功，这将删除追随者日志中的所有冲突条目，并从领导者日志中追加条目。</li>
+</ol>
+<p><strong>日志快速回退（Log Catchup）</strong></p>
+<p>为加速在落后很多的服务器上的日志复制，可以在AppendEntries RPC的响应中包含冲突条目的任期以及该任期存储的第一条日志索引。</p>
+<p><strong>日志覆盖问题</strong></p>
+<p>在复制日志过程中可能出现已提交（committed）的日志条目被覆盖的情况，如下图所示</p>
+<p><img src="C:\Users\AshenWong\Downloads\Images\日志覆盖.png" alt="Untitled"></p>
+<p>为了避免这种问题，这有来自领导者当前任期的日志条目才可以提交，一旦以这种方式提交了当前任期中的条目，那么根据<strong>日志匹配特性</strong>，所有先前的条目都将被间接提交。</p>
+<h2 id="RPC"><a href="#RPC" class="headerlink" title="RPC"></a>RPC</h2><p>服务器之间采用RPC（Remote Procedure Calls，远程调用通信）进行通信，基本的一致性算法只需要两种类型的RPC：</p>
+<p><strong>RequestVote RPCs</strong></p>
+<p>RequestVote RPC由候选人在选举期间发起</p>
+<p><img src="C:\Users\AshenWong\Downloads\Images\RequestVote.png" alt="Untitled"></p>
+<p><strong>AppendEntries RPCs</strong></p>
+<p>AppendEntries RPC由领导者发起，用于复制日志条目并提供一种形式的心跳（heartbeat）以维护他们的权威。</p>
+<ul>
+<li>其中prevLogIndex &#x3D; leader.nextIndex[i] - 1</li>
+</ul>
+<p><img src="C:\Users\AshenWong\Downloads\Images\AppendEntries.png" alt="Untitled"></p>
+<p>除了基本的一致性rpc之外，还有一个追随者快速追赶领导者日志的InstallSnapshot RPC</p>
+<p><strong>InstallSnapshot RPCs</strong></p>
+<p><img src="C:\Users\AshenWong\Downloads\Images\InstallSnapshot.png" alt="Untitled"></p>
+<h2 id="服务器规则"><a href="#服务器规则" class="headerlink" title="服务器规则"></a>服务器规则</h2><p><strong>所有服务器</strong></p>
+<ul>
+<li>如果commitIndex&gt;lastApplied：increment lastApplied，则将log[lastApplied]应用于状态机</li>
+<li>如果RPC请求或响应包含的任期T&gt;currentTerm，那么将 currentTerm设置为T，并且转变为follower</li>
+</ul>
+<p><strong>追随者</strong></p>
+<ul>
+<li>响应来自领导者和候选人的RPC</li>
+<li>如果选举超时内未收到领导者的heartbeat或候选人的投票请求，那么转变为候选人</li>
+</ul>
+<p><strong>候选人</strong></p>
+<ul>
+<li>追随者转变为候选人后便开始选举：<ul>
+<li>增加当前任期</li>
+<li>为自己投票</li>
+<li>重置选举超时时间</li>
+<li>向其他服务器发送RequestVote RPC</li>
+</ul>
+</li>
+<li>如果收到了大多数服务器的投票，转变为领导者</li>
+<li>如果收到新领导者的AppendEntries RPC，转变为追随者</li>
+<li>如果超过选举超时时间，再次开始选举</li>
+</ul>
+<p><strong>领导者</strong></p>
+<ul>
+<li>选举结束后，向每个服务器发送空的AppendEntries RPC（heartbeat）以建立权威；在空闲时间重复上述操作以维持权威</li>
+<li>接收到客户端命令后，将条目添加到本地日志，在将条目应用到状态机后响应客户端</li>
+<li>如果最后一个条目的索引&gt;追随者的nextIndex，则向追随者发送一个携带nextIndex位置的日志条目的AppendEntries RPC<ul>
+<li>如果成功，则更新该追随者的nextIndex和matchIndex</li>
+<li>如果AppendEntries RPC因日志不一致而失败：递减nextIndex并重试</li>
+</ul>
+</li>
+<li>如果存在一个N，使得N&gt;commitIndex，并且多数matchIndex[i]≥N, log[N].term &#x3D;&#x3D; currentTerm，则将 commitIndex设置为N</li>
+</ul>
+<h2 id="服务器集群成员配置变更"><a href="#服务器集群成员配置变更" class="headerlink" title="服务器集群成员配置变更"></a>服务器集群成员配置变更</h2><p>在Raft中，集群首先切换到一个过渡配置，我们称之为<strong>联合共识（joint consensus）</strong>；一旦提交了联合共识，系统就会过渡到新的配置。<strong>联合共识</strong>结合了新旧配置：</p>
+<ul>
+<li>日志条目被复制到两种配置中的所有服务器。</li>
+<li>任一配置中的任何服务器都可以作为领导者。</li>
+<li>达成共识需要获得分别来自新配置和旧配置的大多数支持。（e.g. 如果9台新配置服务器中的8台服务器都表示支持，而3台旧配置中的服务器只有1台服务器表示支持，那么候选者依然无法成为领导者，只有当有两台服务器表示支持时，候选者才能成为）</li>
+</ul>
+<p><img src="C:\Users\AshenWong\Downloads\Images\服务器集群变更.png" alt="Untitled"></p>
+<h2 id="日志压缩"><a href="#日志压缩" class="headerlink" title="日志压缩"></a>日志压缩</h2><p>Raft使用<strong>快照（snapshot）</strong> 来进行日志压缩，每台服务器独立拍摄快照，只包含其日志中提交的条目。当服务器拍摄快照之后，就删除快照已包含的日志内容。</p>
+<p>snapshot元数据，用于快照后的AppendEntries一致性检查：</p>
+<ul>
+<li>last included index，快照替换的日志中最后一个条目的索引</li>
+<li>last included term，上述条目的任期</li>
+<li>lates configuration，用于集群成员配置变更</li>
+</ul>
+<blockquote>
+<p>当leader已经删除了需要发给follower的日志条目时，leader便需要将快照发送给落后的follower</p>
+</blockquote>
+<blockquote>
+<p>当follower接收到InstallSnapshot RPC时，如果快照包含不在其日志中的新信息，他会丢弃所有日志，并被快照取代；如果是描述之前日志内容的快照，那么他将被快照覆盖的日志删除，替换为快照中的信息。</p>
+</blockquote>
+<p><img src="C:\Users\AshenWong\Downloads\Images\日志压缩.png" alt="Untitled"></p>
+<h2 id="客户端行为"><a href="#客户端行为" class="headerlink" title="客户端行为"></a>客户端行为</h2><p><strong>写请求：</strong></p>
+<ul>
+<li>当领导者在日志提交后以及响应客户端前崩溃，那么客户端会重新向集群发送请求，如此情况下这个日志可能会被执行多次。</li>
+</ul>
+<p>解决方案：</p>
+<p>客户端为每个命令分配唯一的序列号。然后，状态机跟踪为每个客户端处理的最新序列号以及相关的响应。如果它收到一个序列号已经被执行的命令，它会立即响应，而不会重新执行请求。</p>
+<p><strong>读请求：</strong></p>
+<ul>
+<li>当客户端发送读请求时，响应请求的领导者可能已经被罢免。</li>
+</ul>
+<p>解决方案：</p>
+<ol>
+<li>首先，领导者必须掌握哪些条目已提交。Leader Completeness属性保证Leader已经提交了所有条目，但是在其期限开始时，它可能不知道是哪些条目。为了找到答案，它需要从它的任期中提交一个条目。Raft通过让每个领导者在任期开始时在日志中提交一个空白的无操作条目来处理这个问题。</li>
+<li>在处理只读请求之前，领导者必须检查它是否已被罢免（如果最近的领导者当选，它的信息可能会过时）。Raft通过让领导者在响应只读请求之前与集群的大多数人交换心跳消息来处理这个问题。</li>
+</ol>
+<h2 id="正确性：线性一致性（Linearzability）"><a href="#正确性：线性一致性（Linearzability）" class="headerlink" title="正确性：线性一致性（Linearzability）"></a>正确性：线性一致性（Linearzability）</h2><p>≈集群就像单独一台机器一样工作</p>
+<ol>
+<li><p><strong>整体操作顺序一致(total order of operations)</strong></p>
+<p>即使操作实际上并发进行，你仍然可以按照整体顺序对它们进行排序。（即后续可以根据读写操作的返回值，对所有读写操作整理出一个符合逻辑的整体执行顺序）</p>
+</li>
+<li><p><strong>实时匹配(match real-time)</strong></p>
+<p>顺序和真实时间匹配，如果第一个操作在第二个操作开始前就完成，那么在整体顺序中，第一个操作必须排在第二个操作之前(换言之如果这么排序后，整体的执行结果不符合逻辑，那么就不符合”实时匹配”)。</p>
+</li>
+<li><p><strong>读操作总是返回最后一次写操作的结果(read return results of last write)</strong></p>
+</li>
+</ol>
+<h2 id="Raft使用"><a href="#Raft使用" class="headerlink" title="Raft使用"></a>Raft使用</h2><p><img src="C:\Users\AshenWong\Downloads\Images\Raft使用.png" alt="Untitled"></p>
+<ol>
+<li>kv服务器中集成了raft相关包</li>
+<li>kv存储主服务器接收客户端请求（客户端不断轮询服务器，直至发现主服务器为止）</li>
+<li>kv服务调用raft的start方法</li>
+<li>raft完成日志复制</li>
+<li>raft通过applych通知kv服务</li>
+<li>kv服务将客户端命令应用至状态机</li>
+<li>kv服务响应客户端</li>
+</ol>
+<p>Raft优化</p>
+<ul>
+<li><p>prevote：少数派由于在被 partition 时可能一直 timeout，因此它们的 term 可能很高。当 partition 被修复时，少数派的通信恢复会使得多数派 step down，使得服务的可用性降低。prevote 机制让 follower 在转变为 candidate 之前，先转到一个过渡态 pre-candidate。在这个状态下，pre-candidate 与集群通信。如果发现现在尚存一个 leader，则从 pre-candidate 又转换回 follower。否则，转换为 candidate，正常开始竞选。</p>
+<ol>
+<li>确认节点A将要发起选举</li>
+<li>向集群内所有的节点（除了自己）发送一个PreVote消息。该消息携带的内容与RequestVote一致（Term都是A的Term+1），名字仅用于区别两种消息。同时A更新自身的投票状态（即PreVote发起时，不投票给自己）。</li>
+<li>其他节点收到消息后，判断是否支持该选举请求，并返回结果。判断方式与RequestVote相同，但不更新自身的投票状态。</li>
+<li>A统计所有的票数（包括自己的一票），如果确认可以当选，那么A正常发起普通的选举流程。</li>
+</ol>
+<p>整个过程有几个需要额外描述的关键点。首先，<strong>发起PreVote并不会改变发起者的任何状态（包括Term和投票状态）</strong>。这样做的目的是一旦集群中有人发起了正式的选举流程，PreVote不会阻塞正式选举。其次，其他节点在响应PreVote消息时，不会更新自身的投票状态。原因同上。</p>
+</li>
+<li><p>write batch for raft log：如果每次有新的 log entries，都立即将其写入磁盘，由于 disk io 的高 overhead，显然会比较严重地影响 performance。一般来说，会先将 log entries 存在 unstable storage 中，例如 memory。然后在合适的时机使用 batch 的方式一次性写入多个 log entries。</p>
+</li>
+<li><p>batch apply：批量地将已经 committed operations, apply 到 state machine。考虑到有些 state machine，例如 database，涉及到 disk io，这样的 batch apply 对于性能的提高是有益的。</p>
+</li>
+<li><p>batch raft messages：每隔一定的 heartbeat interval, leader 都需要 broadcast 一次 heartbeat。当 leader 每次收到 server 层的 operation 时，为了同步效率的考虑，通常也会立即进行一次 broadcast。或者当 leader 收到 follower 的 append entries reply, install snapshot reply 时，假如检测到 follower 的 match index 改变了，leader 也通常会立即 broadcast 一次。由于 network io 较高的 overhead，这样的频繁少量的发送 messages 必定会影响 performance。所以，可以让 transport layer 支持 batch messages，即维护一个 buffer，在一定时间内收集待发送的 messages。等时间一到，才进行批量发送操作。</p>
+</li>
+<li><p>batch persist：将持久化的过程放在更新commitIndex之前，避免每次收到新的命令都要进行磁盘io。</p>
+</li>
+<li><p>async apply log: 当一个 log 被 committed 之后，我们可以用另一个线程去异步的 apply 这个 log。使用 asynchronous apply 的好处在于我们现在可以完全的并行处理 append log 和 apply log，虽然对于一个 client 来说，它的一次 request 仍然要走完完整的 Raft 流程，但对于多个 clients 来说，整体的并发和吞吐量是上去了。</p>
+</li>
+<li><p>automatic step down：在 leader 每次 tick 时，检测 leader 是否在最近收到了多数派的 RPC 回复，包括 request vote, heartbeat, append entries, install snapshot 等。如果最近没有收到多数派的回复，则 leader 自动 step down。这样做的好处包括：</p>
+<ul>
+<li>leader 不会在被 partition 时一直相信自己仍是 leader，然后接收很多 server 层的 operations。因为这些 operations 不会被 commit，且很有可能在 partition 修复后被新 leader 的 log 所覆盖，因此被 partition 的少数派只是占用 network bandwidth 去做无用功。</li>
+<li>clients 可以更快地知道原来的 leader 被 partition 了，因此会把 requests 重发给其它 server。这可以让 clients 更快地找到新 leader，提高服务的可用性。</li>
+<li>一定程度上减少 split brain 的风险</li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ashenwong.github.io">王三土</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ashenwong.github.io/2024/09/10/Raft%E8%AE%BA%E6%96%87%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">https://ashenwong.github.io/2024/09/10/Raft%E8%AE%BA%E6%96%87%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://ashenwong.github.io" target="_blank">王三土的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Raft/">Raft</a></div><div class="post_share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/06/18/Go%E8%AF%AD%E8%A8%80%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-slice/" title="Go语言源码解读-slice"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Go语言源码解读-slice</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">王三土</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://gitee.com/ashen_wong" target="_blank" title="Gitee"><i class="fab fa-github" style="color: #hdhfbb;"></i></a><a class="social-icon" href="mailto:wyf0915@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Raft%E9%9B%86%E7%BE%A4"><span class="toc-number">1.1.</span> <span class="toc-text">Raft集群</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E6%9C%9F%EF%BC%88Term%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">任期（Term）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AD%98%E5%82%A8%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-number">1.3.</span> <span class="toc-text">服务器存储的状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Raft%E7%89%B9%E6%80%A7"><span class="toc-number">1.4.</span> <span class="toc-text">Raft特性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Leader-Election"><span class="toc-number">2.</span> <span class="toc-text">Leader Election</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Log-replication"><span class="toc-number">3.</span> <span class="toc-text">Log replication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RPC"><span class="toc-number">4.</span> <span class="toc-text">RPC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%84%E5%88%99"><span class="toc-number">5.</span> <span class="toc-text">服务器规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E7%BE%A4%E6%88%90%E5%91%98%E9%85%8D%E7%BD%AE%E5%8F%98%E6%9B%B4"><span class="toc-number">6.</span> <span class="toc-text">服务器集群成员配置变更</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E5%8E%8B%E7%BC%A9"><span class="toc-number">7.</span> <span class="toc-text">日志压缩</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%A1%8C%E4%B8%BA"><span class="toc-number">8.</span> <span class="toc-text">客户端行为</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%A7%EF%BC%9A%E7%BA%BF%E6%80%A7%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Linearzability%EF%BC%89"><span class="toc-number">9.</span> <span class="toc-text">正确性：线性一致性（Linearzability）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Raft%E4%BD%BF%E7%94%A8"><span class="toc-number">10.</span> <span class="toc-text">Raft使用</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/09/10/Raft%E8%AE%BA%E6%96%87%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="Raft论文学习笔记">Raft论文学习笔记</a><time datetime="2024-09-10T06:48:14.000Z" title="发表于 2024-09-10 14:48:14">2024-09-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/18/Go%E8%AF%AD%E8%A8%80%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-slice/" title="Go语言源码解读-slice">Go语言源码解读-slice</a><time datetime="2024-06-18T12:40:25.000Z" title="发表于 2024-06-18 20:40:25">2024-06-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/18/Go%E8%AF%AD%E8%A8%80%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-channel/" title="Go语言源码解读-channel">Go语言源码解读-channel</a><time datetime="2024-06-18T08:37:44.000Z" title="发表于 2024-06-18 16:37:44">2024-06-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/17/Golang%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" title="Golang设计模式">Golang设计模式</a><time datetime="2024-06-17T10:52:45.000Z" title="发表于 2024-06-17 18:52:45">2024-06-17</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By 王三土</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
